@@ -51,10 +51,6 @@ summary(pop)
 
 alf <-  read.csv("Trabalho_1/Taxa de Alfabetização_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character" )
 
-
-
-
-
 alf$Município.Estado <- alf$X ; alf$X <- NULL ; alf$X.1 <- NULL
 
 
@@ -290,7 +286,6 @@ dados$aln_por_prof <-  dados$Pop_5_18/ dados$qtd_prof24
 
 dados$tamanho <- dados$populacao24 / dados$densi_demo24
 
-head(dados)
 
 dados$com_tur_km <- dados$Total / dados$tamanho
 
@@ -305,8 +300,12 @@ summary(dados)
 
 dados$Município.Estado <- NULL
 
-modelo <- lm(Renda_M_10 ~ ., data = dados[,-1])
+modelo <- lm(Renda_M_10 ~ ., data = dados)
 summary(modelo)
+
+mod_back_AIC <- step(modelo, direction = 'backward', k = 2)
+summary(mod_back_AIC)
+
 
 plot(modelo$residuals)
 
