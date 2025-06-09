@@ -123,18 +123,27 @@ fecun <- subset(fecun, select = -c(Região.a.que.Pertence,X2010))
 prof<- subset(prof, select = -c(X, X.1,Total))
 fx_etaria<- subset(fx_etaria, select = -c(X, X.1,Total))
 AgenciasBancarias<- subset(AgenciasBancarias, select = -c(X, X.1,Total))
-Consumo<- subset(Consumo, select = -c(X, X.1,Total..Mwh.))
-ContagemPopulacao<- subset(ContagemPopulacao, select = -c(X, X.1,Total)) 
+AgenciasBancarias <- AgenciasBancarias[-c(1,2),]
+Consumo<- subset(Consumo, select = c(Município.Estado,Total_consumo))
+Consumo <- Consumo[-c(1),]
+
+ContagemPopulacao<- subset(ContagemPopulacao, select = -c(X_Contagem, X.1_Contagem,Total_Contagem)) 
 cols <- c("X5.anos", "X6.anos", "X7.anos", "X8.anos", "X9.anos", 
           "X10.anos", "X11.anos", "X12.anos", "X13.anos", "X14.anos",
           "X15.anos", "X16.anos", "X17.anos", "X18.anos")
 fx_etaria$Pop_5_18 <- rowSums(fx_etaria[cols], na.rm = TRUE)
 
-EstabelecimentoSaude<- subset(EstabelecimentoSaude, select = -c(X, X.1,Total))
-EstabelecimentosSetores<- subset(EstabelecimentosSetores, select = -c(X, X.1,Total))
-AereAero<- subset(AereAero, select = -c(X, X.1,Quantidade))
-TaxaMortalidade<- subset(TaxaMortalidade, select = -c(X, X.1,Geral..mil.habitantes.))
-
+# EstabelecimentoSaude<- subset(EstabelecimentoSaude, select = -c(X, X.1,Total))
+EstabelecimentoSaude  <- subset(EstabelecimentoSaude, select = c(Município.Estado,Total_saude))
+EstabelecimentoSaude <- EstabelecimentoSaude[-c(1),]  
+# EstabelecimentosSetores<- subset(EstabelecimentosSetores, select = -c(X, X.1,Total))
+EstabelecimentosSetores<- subset(EstabelecimentosSetores, select = c(Município.Estado,Total_Estabelecimentos))
+EstabelecimentosSetores <- EstabelecimentosSetores[-c(1),]  
+# AereAero<- subset(AereAero, select = -c(X, X.1,Quantidade))
+AereAero<- subset(AereAero, select = c(Município.Estado,Total_aeroportos))
+AereAero <- AereAero[-c(1),]  
+TaxaMortalidade<- subset(TaxaMortalidade, select = c(Município.Estado,Total_mortalidade))
+TaxaMortalidade <- TaxaMortalidade[-c(1),]  
 
 
 ## Verificando os NA da Base
@@ -220,6 +229,8 @@ dados$com_tur_km <- dados$Total_Turismo / dados$tamanho
 dados$aln_por_prof <-  dados$Pop_5_18/ dados$qtd_prof24
 
 
+
+
 ### Vamos analisar as variaveis explicativas, com a correlação de pearson
 library(dplyr)
 library(corrplot)
@@ -242,6 +253,24 @@ corrplot(
 )
 
 ### Com base no gráfico de correlação conseguimos analisar quais são as maiores relações com a nossa target (Variavel Resposta)
+
+
+df1 <- data.frame(corr_matrix)
+matriz_corr <- as.matrix(df1)
+
+# Encontra os índices das células com valor > 0.6 na parte triangular inferior
+# Usar lower.tri() evita duplicados e a diagonal principal (valor 1.0)
+indices <- which(matriz_corr > 0.6 & lower.tri(matriz_corr), arr.ind = TRUE)
+
+# Cria um dataframe com os resultados
+correlacoes_altas <- data.frame(
+  Variavel_1 = rownames(matriz_corr)[indices[, "row"]],
+  Variavel_2 = colnames(matriz_corr)[indices[, "col"]],
+  Correlacao = matriz_corr[indices]
+)
+
+# Exibe o resultado final
+print(correlacoes_altas)
 
 
 ## Criar um fluxo que analisa correlação das variaveis explicativas a mais de 60% e verificar ambas com a target para ver quem fica ou sai da escolha da variavel
@@ -289,53 +318,6 @@ result_max_1 <- result %>%
 group_by(var_comparada) %>%
 slice_max(order_by = valor_var_comparativa, n = 1, with_ties = FALSE) %>%
 ungroup()
-
-
-########### GRAFICO DE ANÁLISE DAS VARIAVEIS COM A TARGET
-
-variaveis_explicativas <- unique(result_max_1$var_comparada)
-
-par(mfrow = c(4, 3))
-
-for (var in variaveis_explicativas) {
-  if (is.numeric(dados[[var]])) {
-    plot(dados[[var]], dados$Renda_M_10,
-         xlab = var, ylab = "IDHM", pch = 1, col = "black",
-         main = paste("Renda_M_10 x", var))
-    abline(lm(Renda_M_10 ~ dados[[var]], data = dados), col = "red")
-  } else {
-    cat("Variável ignorada (não numérica):", var, "\n")
-  }
-}
-
-###
-
-# Abrir um PDF para salvar os gráficos
-pdf("graficos_renda_vs_variaveis_anteriores.pdf", width = 10, height = 8)
-
-# Definir layout: 3 colunas x 3 linhas (ajuste se quiser)
-par(mfrow = c(3, 3))
-
-contador <- 0
-
-for (var in variaveis_explicativas) {
-  if (is.numeric(dados[[var]])) {
-    plot(dados[[var]], dados$Renda_M_10,
-         xlab = var, ylab = "Renda_M_10", pch = 1, col = "black",
-         main = paste("Renda_M_10 x", var))
-    abline(lm(Renda_M_10 ~ dados[[var]], data = dados), col = "red")
-    
-    contador <- contador + 1
-    if (contador %% 9 == 0) {
-      par(mfrow = c(3, 3))  # reinicia layout a cada 9 gráficos
-    }
-  } else {
-    cat("Variável ignorada (não numérica):", var, "\n")
-  }
-}
-
-# Fecha o arquivo PDF
-dev.off()
 
 
 #### COM TODAS
