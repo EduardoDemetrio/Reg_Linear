@@ -15,7 +15,7 @@
 ## Vamos ler as tabelas
 
 exp <-  read.csv("Trabalho_1/Renda Média Domiciliar per Capita_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character")
-PIB <- read.csv("Trabalho_1/PIB per Capita_Tabela.csv",  sep = "\t", fileEncoding = "UTF-8", skip = 1,  colClasses = "character")
+PIB <- read.csv("Trabalho_1/PIB_PERCapita_Tabela.csv",  sep = "\t", fileEncoding = "UTF-8", skip = 1,  colClasses = "character")
 pop <-  read.csv("Trabalho_1/População Estimada - IBGE_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character" )
 alf <-  read.csv("Trabalho_1/Taxa de Alfabetização_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character" )
 nat <-  read.csv("Trabalho_1/Taxa Bruta de Natalidade_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character" )
@@ -29,60 +29,112 @@ sane <- read.csv("Trabalho_1/Atendimento de Esgoto_Tabela.csv", sep = "\t", file
 fecun <- read.csv("Trabalho_1/Taxa de Fecundidade_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character" )
 prof <- read.csv("Trabalho_1/Docentes_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character" )
 fx_etaria <- read.csv("Trabalho_1/População Censitária_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character" )
+AgenciasBancarias <- read.csv("Trabalho_1/Agências Bancárias_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character")
+Consumo <- read.csv("Trabalho_1/Consumo_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character")
+ContagemPopulacao <- read.csv("Trabalho_1/Contagem da População_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character")
+EstabelecimentoSaude <- read.csv("Trabalho_1/Estabelecimento Saúde.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character")
+EstabelecimentosSetores <- read.csv("Trabalho_1/Estabelecimentos - Setores_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character")
+AereAero <- read.csv("Trabalho_1/Aeroportos e Aeródromos_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character" )
+TaxaMortalidade <- read.csv("Trabalho_1/Taxa de Mortalidade_Tabela.csv", sep = "\t", fileEncoding = "UTF-16LE", skip = 1, colClasses = "character")
+
+## Transformando a coluna X em Municipio
+alf$'Município.Estado' <- alf$X
+grav$'Município.Estado' <- grav$X
+tur$'Município.Estado' <- tur$X
+ensino$'Município.Estado' <- ensino$X
+sane$'Município.Estado' <- sane$X
+prof$'Município.Estado' <- prof$X
+cap$'Município.Estado' <- cap$Município
+fx_etaria$'Município.Estado' <- fx_etaria$X
+AgenciasBancarias$'Município.Estado' <- AgenciasBancarias$X
+Consumo$'Município.Estado' <- Consumo$X
+ContagemPopulacao$'Município.Estado' <- ContagemPopulacao$X
+EstabelecimentoSaude$'Município.Estado' <- EstabelecimentoSaude$X
+EstabelecimentosSetores$'Município.Estado' <- EstabelecimentosSetores$X
+AereAero$'Município.Estado' <- AereAero$X
+TaxaMortalidade$'Município.Estado' <- TaxaMortalidade$X
 
 
-## Vamos formatar as variaveis em numeric
+
+
+converter_colunas_numericas <- function(df) {
+  cols <- setdiff(names(df), "Município.Estado")
+  df[cols] <- lapply(df[cols], function(x) as.numeric(gsub(",", ".", x)))
+  return(df)
+}
+
+# ## Vamos formatar as variaveis em numeric
 
 exp$Renda_M_10 <- as.numeric(gsub(",", ".", gsub("\\.", "", exp$X2010)))
 PIB$PIB21 <- as.numeric(gsub("\\.", "", PIB$X2021))
 pop$populacao24 <- as.numeric(gsub("\\.", "", pop$X2024))
 nat$natalidade23 <- as.numeric(gsub(",", ".",  nat$X2023))
-alf$'Município.Estado' <- alf$X
-alf <- alf[-c(1,2), ]
-cols <- setdiff(names(alf), "Município.Estado")
-alf[cols] <- lapply(alf[cols], function(x) as.numeric(gsub(",", ".", x)))
 grav$grav_15a17 <- as.numeric(gsub(",", ".",  grav$grav_15a17))
-grav$Município.Estado <- grav$X 
 densi$densi_demo24 <-  as.numeric(gsub(",", ".", gsub("\\.", "", densi$X2024)))
-tur$Total <-  as.numeric(tur$Total) ; tur$Município.Estado <-  tur$X ; tur$Alimentação <-  as.numeric(tur$Alimentação)
+
+alf <- converter_colunas_numericas(alf)
+alf <- alf[-c(1),]  
+tur <- converter_colunas_numericas(tur)
+tur <- tur[-c(1),] ; tur$Total_Turismo <- tur$Total
 urb$pct_urb22 <-  as.numeric(gsub(",", ".", gsub("\\.", "", urb$X2022)))
-cap$Município.Estado <- cap$Município
 cap$dist_cap21 <-  as.numeric(gsub(",", ".", gsub("\\.", "", cap$X2021)))
-ensino$Município.Estado <- ensino$X 
 ensino$qtd_ensino24 <-  as.numeric(gsub(",", ".", gsub("\\.", "", ensino$Total)))
-sane$Município.Estado <- sane$X
 sane$un_san23 <-  as.numeric(gsub(",", ".", gsub("\\.", "", sane$Unidades.Atendidas...Total)))
 fecun$taxa_fecun10 <-  as.numeric(gsub(",", ".", gsub("\\.", "", fecun$X2010)))
-prof$Município.Estado <- prof$X 
-prof$qtd_prof24 <-  as.numeric(gsub(",", ".", gsub("\\.", "", prof$Total))) 
-cols <- c("X5.anos", "X6.anos", "X7.anos", "X8.anos", "X9.anos", 
-          "X10.anos", "X11.anos", "X12.anos", "X13.anos", "X14.anos",
-          "X15.anos", "X16.anos", "X17.anos", "X18.anos")
+prof$qtd_prof24 <-  as.numeric(gsub(",", ".", gsub("\\.", "", prof$Total)))
+fx_etaria <- converter_colunas_numericas(fx_etaria)
+fx_etaria <- fx_etaria[-c(1),]
+AgenciasBancarias$Total_agencia <- as.numeric(gsub(",", ".", gsub("\\.", "", AgenciasBancarias$Total)))
+Consumo$Total_consumo <- as.numeric(gsub(",", ".", gsub("\\.", "", Consumo$Total..Mwh.)))
+
+ContagemPopulacao <- converter_colunas_numericas(ContagemPopulacao)
+ContagemPopulacao <- ContagemPopulacao[-c(1),]
+ContagemPopulacao$Total_popolucao <- ContagemPopulacao$Total ; 
+
+excluir <- "Município.Estado"
+names(ContagemPopulacao)[names(ContagemPopulacao) != excluir] <- 
+  paste0(names(ContagemPopulacao)[names(ContagemPopulacao) != excluir], "_Contagem")
 
 
-fx_etaria[cols] <- lapply(fx_etaria[cols], function(x) as.numeric(gsub("\\.", "", x)))
-fx_etaria$Pop_5_18 <- rowSums(fx_etaria[cols], na.rm = TRUE)
+EstabelecimentoSaude$Total_saude <- as.numeric(gsub(",", ".", gsub("\\.", "", EstabelecimentoSaude$Total)))
+EstabelecimentosSetores <- converter_colunas_numericas(EstabelecimentosSetores)
+EstabelecimentosSetores <- EstabelecimentosSetores[-c(1),]
+EstabelecimentosSetores$Total_Estabelecimentos <- EstabelecimentosSetores$Total
+AereAero$Total_aeroportos <- as.numeric(gsub(",", ".", gsub("\\.", "", AereAero$Quantidade)))
+TaxaMortalidade$Total_mortalidade <- as.numeric(gsub(",", ".", gsub("\\.", "", TaxaMortalidade$Geral..mil.habitantes.)))
 
-fx_etaria$Município.Estado <- fx_etaria$X
 
 
 ## Removendo colunas e linhas
-exp$X2010 <- NULL ; exp$Região.a.que.Pertence <- NULL ; exp <- exp[-1, ] 
-PIB$Região.a.que.Pertence <- NULL ; PIB$X2021 <- NULL
-pop$Região.a.que.Pertence <- NULL ; pop$X2024 <- NULL
-alf$X <- NULL ; alf$X.1 <- NULL
-nat$X2023 <- NULL ; nat$Região.a.que.Pertence <- NULL ; nat <- nat[-1, ]
-grav$X <- NULL ; grav$X.1 <- NULL ; grav <- grav[-1, ]
-densi$X2024 <- NULL ; densi$Região.a.que.Pertence <- NULL ;densi <- densi[-1, ]
-tur$X <- NULL ; tur$X.1 <- NULL ; tur <- tur[-c(1,2), ]
-urb$Região.a.que.Pertence <-  NULL ; urb$X2022 <- NULL
-cap$Município <- NULL ; cap$Região.a.que.Pertence <- NULL ; cap$X2021 <-  NULL
-ensino$X <- NULL ; ensino$X.1 <- NULL ; ensino$Total <-  NULL
-sane$X.1 <- NULL ;sane$X <- NULL ; sane$Unidades.Atendidas...Total <-  NULL
-prof$X <- NULL ; prof$X.1 <- NULL  ; prof$Total <-  NULL
-fecun$X2010 <-  NULL ; fecun$Região.a.que.Pertence <- NULL
 
-fx_etaria$X <- NULL ; fx_etaria$X.1 <- NULL
+exp <- subset(exp, select = -c(Região.a.que.Pertence,X2010))
+PIB <- subset(PIB, select = -c(Região.a.que.Pertence,X2021))
+pop <- subset(pop, select = -c(Região.a.que.Pertence,X2024))
+alf <- subset(alf, select = -c(X, X.1))
+nat <- subset(nat, select = -c(Região.a.que.Pertence,X2023))
+grav <- subset(grav, select = -c(X, X.1))
+densi <- subset(densi, select = -c(Região.a.que.Pertence,X2024))
+tur <- subset(tur, select = -c(X, X.1,Total))
+urb <- subset(urb, select = -c(Região.a.que.Pertence,X2022))
+cap <- subset(cap, select = -c(Região.a.que.Pertence,Município,X2021))
+ensino <- subset(ensino, select = -c(X, X.1,Total))
+sane <- subset(sane, select = -c(X, X.1,Unidades.Atendidas...Total))
+fecun <- subset(fecun, select = -c(Região.a.que.Pertence,X2010))
+prof<- subset(prof, select = -c(X, X.1,Total))
+fx_etaria<- subset(fx_etaria, select = -c(X, X.1,Total))
+AgenciasBancarias<- subset(AgenciasBancarias, select = -c(X, X.1,Total))
+Consumo<- subset(Consumo, select = -c(X, X.1,Total..Mwh.))
+ContagemPopulacao<- subset(ContagemPopulacao, select = -c(X, X.1,Total)) 
+cols <- c("X5.anos", "X6.anos", "X7.anos", "X8.anos", "X9.anos", 
+          "X10.anos", "X11.anos", "X12.anos", "X13.anos", "X14.anos",
+          "X15.anos", "X16.anos", "X17.anos", "X18.anos")
+fx_etaria$Pop_5_18 <- rowSums(fx_etaria[cols], na.rm = TRUE)
+
+EstabelecimentoSaude<- subset(EstabelecimentoSaude, select = -c(X, X.1,Total))
+EstabelecimentosSetores<- subset(EstabelecimentosSetores, select = -c(X, X.1,Total))
+AereAero<- subset(AereAero, select = -c(X, X.1,Quantidade))
+TaxaMortalidade<- subset(TaxaMortalidade, select = -c(X, X.1,Geral..mil.habitantes.))
+
 
 
 ## Verificando os NA da Base
@@ -101,7 +153,14 @@ dfs <- list(
   sane  = sane,
   fecun = fecun,
   prof  = prof,
-  fx_etaria = fx_etaria
+  fx_etaria = fx_etaria,
+  AgenciasBancarias = AgenciasBancarias,
+  Consumo = Consumo,
+  ContagemPopulacao = ContagemPopulacao,
+  EstabelecimentoSaude = EstabelecimentoSaude,
+  EstabelecimentosSetores = EstabelecimentosSetores,
+  AereAero = AereAero,
+  TaxaMortalidade = TaxaMortalidade 
 )
 
 na_por_coluna <- lapply(dfs, function(df) {
@@ -118,8 +177,13 @@ na_matriz
 tur[is.na(tur)] <- 0
 grav[is.na(grav)] <- 0
 cap[is.na(cap)] <- 0
-sane[is.na(sane)] <-0
-
+sane[is.na(sane)] <- 0
+fx_etaria[is.na(fx_etaria)] <- 0
+AgenciasBancarias[is.na(AgenciasBancarias)]<-0 
+Consumo[is.na(Consumo)] <- 0 
+ContagemPopulacao[is.na(ContagemPopulacao)] <-0
+EstabelecimentosSetores[is.na(EstabelecimentosSetores)] <- 0 
+AereAero [is.na(AereAero)]<-0
 ## Rodando novamente a função pra verificar os NA
 
 ### Vamos agora unir as variáveis em df só
@@ -132,22 +196,28 @@ dados <- merge(dados, grav, by = "Município.Estado")
 dados <- merge(dados, densi, by = "Município.Estado")
 dados <- merge(dados, tur, by = "Município.Estado")
 dados <- merge(dados, urb, by = "Município.Estado")
-dados <- merge(dados, cap, by = "Município.Estado")
 dados <- merge(dados, ensino, by = "Município.Estado")
 dados <- merge(dados, sane, by = "Município.Estado")
 dados <- merge(dados, fecun, by = "Município.Estado")
 dados <- merge(dados, prof, by = "Município.Estado")
-dados <- merge(dados, fx_etaria[, c("Município.Estado", "Pop_5_18")],
-               by = "Município.Estado", all.x = TRUE)
+dados <- merge(dados, fx_etaria, by = "Município.Estado")
+dados <- merge(dados, AgenciasBancarias, by= "Município.Estado")
+dados <- merge(dados, Consumo, by= "Município.Estado")
+dados <- merge(dados, ContagemPopulacao, by= "Município.Estado")
+dados <- merge(dados, EstabelecimentoSaude, by= "Município.Estado")
+dados <- merge(dados, EstabelecimentosSetores, by= "Município.Estado")
+dados <- merge(dados, AereAero, by= "Município.Estado")
+dados <- merge(dados, TaxaMortalidade, by= "Município.Estado")
+dados <- merge(dados, cap, by = "Município.Estado")
 
 ### Criou variaveis - Gustavo
-dados$aln_por_prof <-  dados$Pop_5_18/ dados$qtd_prof24
 dados$tamanho <- dados$populacao24 / dados$densi_demo24
-dados$com_tur_km <- dados$Total / dados$tamanho
 dados$densidade_saneamento <- dados$un_san23 / dados$tamanho
 dados$unid_ensino_por_hab <- dados$qtd_ensino24 / dados$populacao24
 dados$densidade_ensino <- dados$qtd_ensino24 / dados$tamanho
 
+dados$com_tur_km <- dados$Total_Turismo / dados$tamanho
+dados$aln_por_prof <-  dados$Pop_5_18/ dados$qtd_prof24
 
 
 ### Vamos analisar as variaveis explicativas, com a correlação de pearson
@@ -182,7 +252,8 @@ var_combinada <- c()
 valores_correlacao <- c()
 df1 <- data.frame(corr_matrix)
 
-for (i in 1:29){
+## 41 - Com as mais - 29 com anteriores
+for (i in 1:157){
   dados_comparativos <- df1[i]
   validacao <- rownames(dados_comparativos)[dados_comparativos[,1]>0.6]
   valores <- dados_comparativos[validacao,1]
@@ -218,3 +289,95 @@ result_max_1 <- result %>%
 group_by(var_comparada) %>%
 slice_max(order_by = valor_var_comparativa, n = 1, with_ties = FALSE) %>%
 ungroup()
+
+
+########### GRAFICO DE ANÁLISE DAS VARIAVEIS COM A TARGET
+
+variaveis_explicativas <- unique(result_max_1$var_comparada)
+
+par(mfrow = c(4, 3))
+
+for (var in variaveis_explicativas) {
+  if (is.numeric(dados[[var]])) {
+    plot(dados[[var]], dados$Renda_M_10,
+         xlab = var, ylab = "IDHM", pch = 1, col = "black",
+         main = paste("Renda_M_10 x", var))
+    abline(lm(Renda_M_10 ~ dados[[var]], data = dados), col = "red")
+  } else {
+    cat("Variável ignorada (não numérica):", var, "\n")
+  }
+}
+
+###
+
+# Abrir um PDF para salvar os gráficos
+pdf("graficos_renda_vs_variaveis_anteriores.pdf", width = 10, height = 8)
+
+# Definir layout: 3 colunas x 3 linhas (ajuste se quiser)
+par(mfrow = c(3, 3))
+
+contador <- 0
+
+for (var in variaveis_explicativas) {
+  if (is.numeric(dados[[var]])) {
+    plot(dados[[var]], dados$Renda_M_10,
+         xlab = var, ylab = "Renda_M_10", pch = 1, col = "black",
+         main = paste("Renda_M_10 x", var))
+    abline(lm(Renda_M_10 ~ dados[[var]], data = dados), col = "red")
+    
+    contador <- contador + 1
+    if (contador %% 9 == 0) {
+      par(mfrow = c(3, 3))  # reinicia layout a cada 9 gráficos
+    }
+  } else {
+    cat("Variável ignorada (não numérica):", var, "\n")
+  }
+}
+
+# Fecha o arquivo PDF
+dev.off()
+
+
+#### COM TODAS
+# Seleciona variáveis numéricas, excluindo as identificadoras
+variaveis_numericas <- names(dados)[
+  sapply(dados, is.numeric) & !(names(dados) %in% c("Renda_M_10", "Município.Estado"))
+]
+
+# Abrir PDF
+pdf("graficos_renda_completos.pdf", width = 10, height = 8)
+
+# Contador de gráficos por página
+contador <- 0
+
+# Inicializa layout da 1ª página
+par(mfrow = c(3, 3))
+
+for (var in variaveis_numericas) {
+  x <- dados[[var]]
+  y <- dados$Renda_M_10
+  
+  # Checar se a variável é válida para plotagem
+  if (all(is.na(x)) || sd(x, na.rm = TRUE) == 0) {
+    cat("Variável ignorada (NA ou constante):", var, "\n")
+    next
+  }
+  
+  # Plotagem segura
+  try({
+    plot(x, y,
+         xlab = var, ylab = "Renda_M_10",
+         pch = 1, col = "black",
+         main = paste("Renda_M_10 x", var))
+    abline(lm(y ~ x), col = "red")
+  }, silent = TRUE)
+  
+  contador <- contador + 1
+  
+  # Nova página a cada 9 gráficos
+  if (contador %% 9 == 0) {
+    par(mfrow = c(3, 3))
+  }
+}
+
+dev.off()
